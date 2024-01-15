@@ -14,7 +14,13 @@ import {
 import { CreateContact, UpdateContact, UpdateIsActive } from './dto';
 import { ContactsService } from '../services/contacts.service';
 import { Contact } from '../entities/contact.entity';
-import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
 @ApiTags('Contacts')
 @Controller('api/contacts')
@@ -46,7 +52,7 @@ export class ContactsController {
     const contact = await this.contactsService.findOne(contactId);
     if (contact === undefined) {
       throw new HttpException(
-        'Contact with ${contactId} not found',
+        `Contact with ${contactId} not found`,
         HttpStatus.NOT_FOUND,
       );
     }
@@ -58,6 +64,7 @@ export class ContactsController {
   @ApiResponse({ status: HttpStatus.OK, description: 'Success', type: Contact })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad Request' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
+  @ApiBody({ type: CreateContact })
   createContact(
     @Body()
     createContact: CreateContact,
@@ -79,6 +86,7 @@ export class ContactsController {
   @ApiResponse({ status: HttpStatus.OK, description: 'Success', type: Contact })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad Request' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
+  @ApiBody({ type: UpdateContact })
   async updateContact(
     @Param('contactId', new ParseIntPipe()) contactId: string,
     @Body() updateContact: UpdateContact,
@@ -86,7 +94,7 @@ export class ContactsController {
     const contact = await this.contactsService.findOne(contactId);
     if (contact === undefined) {
       throw new HttpException(
-        'Contact with ${contactId} not found',
+        `Contact with ${contactId} not found`,
         HttpStatus.NOT_FOUND,
       );
     }
@@ -109,6 +117,7 @@ export class ContactsController {
   @ApiResponse({ status: HttpStatus.OK, description: 'Success', type: Contact })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad Request' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
+  @ApiBody({ type: UpdateIsActive })
   async updateIsActiveContact(
     @Param('contactId', new ParseIntPipe()) contactId: string,
     @Body() updateIsActiveContact: UpdateIsActive,
@@ -116,7 +125,7 @@ export class ContactsController {
     const contact = await this.contactsService.findOne(contactId);
     if (contact === undefined) {
       throw new HttpException(
-        'Contact with ${contactId} not found',
+        `Contact with ${contactId} not found`,
         HttpStatus.NOT_FOUND,
       );
     }
@@ -126,7 +135,7 @@ export class ContactsController {
 
   @Delete(':contactId')
   @ApiOperation({
-    summary: 'Returns update parameter isActive with specified id',
+    summary: 'Delete contact with specified id',
   })
   @ApiParam({
     name: 'contactId',
@@ -136,9 +145,16 @@ export class ContactsController {
   @ApiResponse({ status: HttpStatus.OK, description: 'Success', type: Contact })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad Request' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
-  deleteContact(
+  async deleteContact(
     @Param('contactId', new ParseIntPipe()) contactId: string,
   ): Promise<void> {
+    const contact = await this.contactsService.findOne(contactId);
+    if (contact === undefined) {
+      throw new HttpException(
+        `Contact with ${contactId} not found`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
     return this.contactsService.remove(contactId);
   }
 }
